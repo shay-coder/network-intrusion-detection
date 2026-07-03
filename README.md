@@ -55,7 +55,7 @@ are flow **timing (IAT)**, **duration**, and **packet-length statistics**.
 | Setup | Accuracy | Attack Recall | F1 |
 |-------|----------|---------------|-----|
 | Within-day baseline | 99.90% | ~0.999 | 0.9983 |
-| Train Tue+Wed → Test Friday (DDoS + unseen PortScan) | _run to fill_ | _run to fill_ | _run to fill_ |
+| Train Tue+Wed → Test Friday (DDoS + unseen PortScan) | 63.98% | 34.52% | _run to fill_ |
 | Train all other days → Test Thursday (unseen Web Attacks) | _run to fill_ | _run to fill_ | _run to fill_ |
 
 **The point of this table:** the drop between row 1 and rows 2–3 is the *generalization gap* —
