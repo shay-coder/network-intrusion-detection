@@ -1,7 +1,7 @@
 # Network Intrusion Detection with Machine Learning
 ### CIC-IDS2017 · Random Forest vs Neural Network · Cross-Day Generalization Analysis
 
-**Author:** Shanzay Jamil · [GitHub](https://github.com/shay-coder) · shanzay5771@gmail.com
+**Author:** Shanzay Jamil · [GitHub](https://github.com/shay-coder) · 
 
 A machine-learning-based Intrusion Detection System (IDS) built on **CIC-IDS2017**, the
 benchmark dataset from the Canadian Institute for Cybersecurity (UNB). The project goes beyond
