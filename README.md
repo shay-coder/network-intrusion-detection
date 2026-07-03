@@ -7,7 +7,7 @@ A machine-learning-based Intrusion Detection System (IDS) built on **CIC-IDS2017
 benchmark dataset from the Canadian Institute for Cybersecurity (UNB). The project goes beyond
 a single accuracy number: it deliberately evaluates the model twice — once the *easy* way
 (random split) and once the *honest* way (train on some days, test on unseen days and unseen
-attack families) — and analyses the gap between them.
+attack families)  and analyses the gap between them.
 
 ---
 
