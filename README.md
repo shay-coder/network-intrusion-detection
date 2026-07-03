@@ -5,7 +5,7 @@
 
 A machine-learning-based Intrusion Detection System (IDS) built on **CIC-IDS2017**, the
 benchmark dataset from the Canadian Institute for Cybersecurity (UNB). The project goes beyond
-a single accuracy number: it deliberately evaluates the model twice — once the *easy* way
+a single accuracy number: it deliberately evaluates the model twice  once the *easy* way
 (random split) and once the *honest* way (train on some days, test on unseen days and unseen
 attack families)  and analyses the gap between them.
 
@@ -21,8 +21,6 @@ attack families)  and analyses the gap between them.
 └── README.md
 ```
 
-## 🚀 Quick start
-
 ```bash
 git clone https://github.com/shay-coder/network-intrusion-detection.git
 cd network-intrusion-detection
@@ -31,7 +29,7 @@ pip install -r requirements.txt
 jupyter notebook Network_Intrusion_Detection.ipynb
 ```
 
-## 🧪 What's in the main notebook
+##  What's in the main notebook
 
 | Step | What happens | Why |
 |------|--------------|-----|
@@ -48,7 +46,7 @@ jupyter notebook Network_Intrusion_Detection.ipynb
 | Random Forest | **99.90%** | ~0.999 | 0.9983 |
 | Neural Network (MLP) | 99.42% | ~0.99 | 0.9900 |
 
-Random Forest wins — consistent with the well-documented pattern that tree ensembles
+Random Forest wins  consistent with the well-documented pattern that tree ensembles
 outperform standard neural networks on engineered tabular features. Top predictive features
 are flow **timing (IAT)**, **duration**, and **packet-length statistics**.
 
