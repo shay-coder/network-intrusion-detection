@@ -62,14 +62,11 @@ Runs on Google Colab too: mount Drive and set `DATA_DIR = '/content/drive/MyDriv
 ![Model comparison](figures/model_comparison.png)
 ![Confusion matrix](figures/confusion_matrix.png)
 
-Random Forest wins — consistent with the well-documented pattern that tree ensembles outperform
-standard neural networks on engineered tabular features. Top predictive features are flow
-**timing (IAT)**, **duration**, and **packet-length statistics** — all measures of traffic
-*shape and rhythm*, none of packet *content*. That observation foreshadows Part 2.
+Random Forest beat the neural network in my results. Tree models usually do better on table style data because they ask simple yes or no questions on each column. The most important features turned out to be packet timing, flow duration, and packet size statistics. All of these describe how the traffic behaves, not what is inside the packets. That is exactly why the model fails in Part 2, where the attack is hidden inside the packet content.
 
 ![Feature importance](figures/feature_importance.png)
 
-## 🔬 Part 2 — Cross-day generalization (the honest test)
+## 🔬 Part 2 — Cross-day generalization
 
 No random split: train and test are entirely different capture days.
 
@@ -81,19 +78,15 @@ No random split: train and test are entirely different capture days.
 
 ![Generalization gap](figures/generalization_gap.png)
 
-### Experiment 1 — new day, one related family + one unseen family
+### Experiment 1: new day, one related family + one unseen family
 
-- **DDoS: 63% recall — partial transfer.** Training included the DoS family (Hulk, GoldenEye,
-  slowloris); DDoS is its distributed cousin, so flood-shaped patterns partially carry over.
-- **PortScan: 0.16% recall — near-total blindness, contrary to our stated expectation.**
-  We predicted scans would transfer because their shape is so distinctive. The data disagreed,
-  and the *why* matters: the forest learned tight boundaries around the specific attack shapes
-  it saw (floods), not an abstract "robotic traffic" concept. A scan flow — one or two tiny
-  packets, then done — sits in feature space next to millions of harmless short benign
-  connections. **Transfer depends on similarity to trained attack families, not on how
-  distinctive an attack looks to a human.**
-- Precision stayed at 0.996 while recall collapsed: unseen attacks fail *toward benign*
-  (silence), not toward false alarms.
+DDoS recall was 63% because training included DoS attacks (Hulk, GoldenEye, slowloris), and DDoS is the distributed version of the same flood idea, so the learned patterns partly carried over
+PortScan recall was only 0.16%, which surprised me since I expected scans to be caught easily due to their unusual traffic
+The reason scans were missed: the model only learned the exact flood shapes from training, while a scan is the opposite shape, just one or two tiny packets that look nearly identical to normal short connections
+
+Conclusion: an attack is detected only if it is similar to a trained attack family, not because it looks distinctive to a human
+Precision stayed at 0.996 while recall collapsed, meaning the model fails silently by labeling unseen attacks as normal instead of raising false alarms
+
 
 ![Per-attack recall](figures/exp1_per_attack_recall.png)
 
