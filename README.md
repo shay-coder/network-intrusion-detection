@@ -80,68 +80,73 @@ No random split: train and test are entirely different capture days.
 
 ### Experiment 1: new day, one related family + one unseen family
 
-DDoS recall was 63% because training included DoS attacks (Hulk, GoldenEye, slowloris), and DDoS is the distributed version of the same flood idea, so the learned patterns partly carried over
-PortScan recall was only 0.16%, which surprised me since I expected scans to be caught easily due to their unusual traffic
-The reason scans were missed: the model only learned the exact flood shapes from training, while a scan is the opposite shape, just one or two tiny packets that look nearly identical to normal short connections
-
-Conclusion: an attack is detected only if it is similar to a trained attack family, not because it looks distinctive to a human
-Precision stayed at 0.996 while recall collapsed, meaning the model fails silently by labeling unseen attacks as normal instead of raising false alarms
-
+- DDoS recall was 63% because training included DoS attacks (Hulk, GoldenEye, slowloris),
+  and DDoS is the distributed version of the same flood idea, so the learned patterns
+  partly carried over
+- PortScan recall was only 0.16%, which surprised me since I expected scans to be caught
+  easily due to their unusual traffic
+- The reason scans were missed: the model only learned the exact flood shapes from training,
+  while a scan is the opposite shape, just one or two tiny packets that look nearly identical
+  to normal short connections
+- Conclusion: an attack is detected only if it is similar to a trained attack family, not
+  because it looks distinctive to a human
+- Precision stayed at 0.996 while recall collapsed, meaning the model fails silently by
+  labeling unseen attacks as normal instead of raising false alarms
 
 ![Per-attack recall](figures/exp1_per_attack_recall.png)
 
-### Experiment 2 — the accuracy trap, demonstrated live
+### Experiment 2: unseen web attacks and the accuracy trap
 
-The model caught **2 of 648 web attacks** (recall 0.003) yet reports **98.66% accuracy** —
-because the test day is 98.7% benign and predicting "benign" for everything is enough. A
-near-total detection failure wearing a 99% badge: the textbook argument against accuracy on
-imbalanced data, reproduced on real traffic.
+- The model caught only **2 out of 648 web attacks** (recall 0.003), yet accuracy still
+  shows **98.66%**
+- The reason is class imbalance: the test day is 98.7% benign, so a model that labels
+  almost everything as normal still gets a high accuracy score while detecting nothing
+- This result showed me in practice why accuracy is the wrong metric for intrusion
+  detection on imbalanced data
+- The failure is structural, not a tuning problem: XSS and SQL injection hide inside the
+  HTTP payload text, and flow features never look at the payload
+- No amount of extra data or a bigger model can fix this, because the features simply do
+  not carry the signal
+- The real fix is different features, such as payload aware models or behavioural graph
+  representations, which is the current research direction in this field
+  
+##  Key findings
 
-The failure is **structural, not a tuning problem**: XSS/SQL-injection maliciousness lives in
-the HTTP payload text, and flow features never observe payload. No extra data or model capacity
-recovers a signal the features do not carry — the fix is *different features* (payload-aware
-models, behavioural/graph representations), which is precisely the current research frontier in
-ML-based intrusion detection.
+1. **A plain Random Forest can fully solve within day detection of volumetric attacks**
+   (99.90% on flow features), but I learned that this number means very little for real
+   deployment
+2. **The generalization gap is my main result:** attack recall drops from 0.999 to 0.345
+   to 0.003 as the test moves from familiar campaigns, to an unseen day, to an unseen
+   attack family
+3. **Accuracy is the wrong metric for intrusion detection.** In Experiment 2 the model
+   scored 98.66% accuracy while catching only 0.3% of the attacks, so I report attack
+   recall and F1 throughout the project
+4. **What decides transfer is similarity to a trained attack family, not how unusual the
+   attack looks.** The PortScan result proved my own expectation wrong, and I kept this
+   negative result in the analysis instead of hiding it
+5. **Flow features are blind to content based attacks by design**, since they never look
+   inside the packets. This points toward payload aware and behavioural graph approaches
+   rather than more data or bigger models
+   
+## Assumptions and limitations
 
-## 📌 Key findings
-
-1. **Within-day detection of volumetric attacks is essentially solved** by a plain Random Forest
-   on flow features (99.90%) — and that number is close to meaningless for deployment.
-2. **The generalization gap is the real result:** recall 0.999 → 0.345 → 0.003 as the test moves
-   from familiar campaigns to unseen days to unseen attack families.
-3. **Accuracy is the wrong metric for IDS.** Exp 2 scores 98.66% accuracy while detecting 0.3%
-   of attacks. Attack recall and F1 are reported throughout.
-4. **Attack-family similarity, not visual distinctiveness, drives transfer** (the PortScan
-   surprise) — an honest negative result, kept and analysed rather than hidden.
-5. **Flow features are structurally blind to content-based attacks**, motivating payload-aware
-   and behavioural-graph approaches rather than more data or bigger models.
-
-## ⚠️ Assumptions & limitations (read before citing numbers)
-
-- **Binary framing.** All attack types collapse to ATTACK=1; attack-type identification is future work.
-- **Flow-level features only.** No payload/content inspection; raw packet bytes unused.
-- **Subsampling.** 50k rows randomly sampled per CSV (seeded) for tractability. Rare classes are
-  under-represented — the Thursday test file contains only **7 SQL Injection samples**, so
-  per-class recalls on small classes are noisy.
-- **Single lab environment.** Even the cross-day experiments stay inside CIC-IDS2017 — one
-  network topology, one week, simulated users. True deployment shift (different network/era)
-  would be harder still; cross-dataset evaluation on CSE-CIC-IDS2018 is the natural next step.
-- **Known dataset caveats.** CIC-IDS2017 has documented labelling/flow-construction issues
-  (Engelen et al., 2021; Lanvin et al., 2023); results on corrected releases can differ.
-- **No hyperparameter tuning.** Defaults + fixed seeds, deliberately — comparisons isolate
-  data-handling effects, not tuning effort.
-
-## 🗺️ Roadmap
-
-- [ ] Multi-class attack-type classification with per-class confusion matrix
-- [ ] Class-imbalance treatments (class weights, SMOTE) targeting Web-Attack recall
-- [ ] 5-fold stratified cross-validation (mean ± std instead of single-split numbers)
-- [ ] Gradient-boosted trees (XGBoost / LightGBM) benchmark
-- [ ] Feature selection: retrain on top-15 features for real-time feasibility
-- [ ] Cross-dataset test on CSE-CIC-IDS2018
-- [ ] Payload-aware features for the web-attack blind spot
-- [ ] Minimal live demo: CICFlowMeter output → trained model → alerts
-
+- **Binary framing.** I collapsed all attack types into a single ATTACK=1 label, so the
+  model only decides attack or benign. Identifying the specific attack type is future work
+- **Flow level features only.** All 78 features describe traffic behaviour such as timing,
+  sizes and flags. I never inspect the payload or raw packet bytes, so the model cannot
+  see the content inside packets
+- **Subsampling.** I randomly sampled 50k rows per CSV (with a fixed seed) to keep the
+  project manageable. This under represents rare classes, for example the Thursday test
+  file contains only 7 SQL Injection samples, so recall numbers on small classes are noisy
+- **Single lab environment.** Even my cross day experiments stay inside CIC-IDS2017, which
+  is one network, one week, and simulated users. Real deployment on a different network
+  would be harder still. Testing on CSE-CIC-IDS2018 is the natural next step
+- **Known dataset issues.** Published work (Engelen et al., 2021; Lanvin et al., 2023) has
+  documented labelling and flow construction problems in CIC-IDS2017, so results on the
+  corrected releases of the dataset can differ
+- **No hyperparameter tuning.** I kept default model settings with fixed seeds on purpose,
+  so that my comparisons measure the effect of the data splits and not tuning effort
+  
 ## 📚 Dataset & citation
 
 CIC-IDS2017 — Canadian Institute for Cybersecurity, University of New Brunswick.
