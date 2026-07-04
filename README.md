@@ -1,24 +1,24 @@
 # Network Intrusion Detection with Machine Learning
 ### CIC-IDS2017 · Random Forest vs Neural Network · Cross-Day Generalization Analysis
 
-**Author:** Shanzay Jamil · [GitHub](https://github.com/shay-coder) · shanzay5771@gmail.com
+**Author:** Shanzay Jamil · [GitHub](https://github.com/shay-coder) · 
 
 A machine-learning-based Intrusion Detection System (IDS) built on **CIC-IDS2017**, the benchmark
 dataset from the Canadian Institute for Cybersecurity (UNB). The project deliberately evaluates
-the same model twice — once the *easy* way (random split) and once the *honest* way (train on
-some days, test on unseen days and unseen attack families) — and analyses the gap between them.
+the same model twice, once the *easy* way (random split) and once the *honest* way (train on
+some days, test on unseen days and unseen attack families) and analyses the gap between them.
 
-**The headline result, in one column of numbers:** attack recall goes
+**Result** attack recall goes
 
 > **0.999** (random split) → **0.345** (unseen day) → **0.003** (unseen web attacks)
 
 A model that looks essentially perfect under standard evaluation misses 2 of every 3 attacks the
-first time it faces a new day, and is blind to content-based attacks — while still reporting
+first time it faces a new day, and is blind to content-based attacks, while still reporting
 98.66% *accuracy*. Measuring and explaining that gap is the point of this repository.
 
 ---
 
-## 📁 Repository structure
+## Repository structure
 
 ```
 ├── Network_Intrusion_Detection.ipynb   # Main pipeline: EDA → cleaning → RF & MLP → evaluation
@@ -29,7 +29,7 @@ first time it faces a new day, and is blind to content-based attacks — while s
 └── README.md
 ```
 
-## 🚀 Quick start
+## Steps
 
 ```bash
 git clone https://github.com/shay-coder/network-intrusion-detection.git
@@ -42,7 +42,7 @@ jupyter notebook Network_Intrusion_Detection.ipynb
 Runs on Google Colab too: mount Drive and set `DATA_DIR = '/content/drive/MyDrive/data/'`
 (a commented line is provided in the notebooks).
 
-## 🧪 Part 1 — Main notebook (within-day evaluation)
+##  Part 1 — Main notebook (within-day evaluation)
 
 | Step | What happens | Why |
 |------|--------------|-----|
@@ -52,7 +52,7 @@ Runs on Google Colab too: mount Drive and set `DATA_DIR = '/content/drive/MyDriv
 | Models | Random Forest (raw features) · MLP 64→32 (standardized, early stopping) | Tree ensembles vs neural nets on tabular data |
 | Evaluation | Accuracy + **Attack Recall** + F1, confusion matrix, feature importance | For an IDS, missed attacks (recall) matter more than accuracy |
 
-### Results — random 80/20 split
+### Results: random 80/20 split
 
 | Model | Accuracy | Attack Recall | F1 |
 |-------|----------|---------------|------|
